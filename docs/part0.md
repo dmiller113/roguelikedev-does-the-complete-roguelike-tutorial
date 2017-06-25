@@ -42,3 +42,7 @@ Actual gameplay-wise, the goals are:
 * Items focusing on in combat escape being a rarity.
 * Random Artifacts (Stretch)
 * Rune System for armors providing set bonuses per rune.
+
+##### Links:
+[Elm Homepage](https://www.elm-lang.org)
+[r/roguelikedev](https://www.reddet.com/r/roguelikedev)
