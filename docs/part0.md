@@ -8,7 +8,7 @@ The second technology I tried was a EMCA 6~7 compliant bundler called Rollup. Ho
 The last, and most successful solution I tried was a plain webpack bundling. Note that at this point, I didn't have any webpack config and was using `./node_modules/bin/webpack` for all my webpack needs. After this bundled and ran on a browser, I started work on getting an `@` on screen with **Rot.js** and called it a night after finishing.
 
 # Part 0, Thinking
-The next few days, I was caught up thinking about an old desire of mine, to see a roguelike programmed in a functional language. My current functional language of choice is even web ready: **Elm**. After a few days of thinking, I was stuck at work after work for a few hours, so I made a branch and set to work. Back to step 0.
+The next few days, I was caught up thinking about an old desire of mine, to see a roguelike programmed in a functional language. My current functional language of choice is even web ready: **Elm**. After a few days of thinking, I was stuck after work for a few hours, so I made a branch and set to work. Back to step 0.
 
 # Part 0, Elm
 So first things first. Remove all traces of webpack, babel, **everything**. One `rm` and a pruning of my `package.json` later, we were back at square one.
