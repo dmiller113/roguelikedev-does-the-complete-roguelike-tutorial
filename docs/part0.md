@@ -22,15 +22,21 @@ With that, I ran into a few snags, though mostly issues that _may_ cause problem
 # Goals for this Project
 The main goal for this project is an actual released game. My plan is to revisit the game that I originally was making with this tutorial series: **Fires of Charon**, a game lost to the ravages of time and MegaUpload. Fortunately, it was not much beyond what the tutorial had at the time: a single floor which saved and loaded, 2 monsters, equipment with my own implementation of mechanics as the equipment section of the tutorial had not come out yet, and a basic dungeon generation algorithm.
 
-The basic story for the game is that the player has been thrown into the **Well of Sacrifice** under which lives the **Caves of Charon**, a forgotten and seldom visited place connected to many deep and lost portions of the world. Its populous as varied, as it is horrible, with many of its residents having been seldom viewed by Man, being known only by story and song, fearfully whispered by dim campfires and hearths.
+The basic story for the game is that the player has been thrown into the **Well of Sacrifice** under which lives the **Caves of Charon**, a forgotten and seldom visited place connected to many deep and lost portions of the world. Its populous is as varied, as it is horrible, with many of its residents having been seldom viewed by Man, being known only by story and song, fearfully whispered by dim campfires and hearths.
 
-Lying broken and dying on the floor of the well, the player is presented with a choice by the **Shade of Koranth**, who has been trapped in the well by magics of old. The shade gives the player the choice of dying then and there, or being possessed; of healing to more than past strength and hew or of dying forgotten on this dusty floor. The price of such resurection would of course be small, only that the player provide food for it, and be carried out of this forsaken cave. Of course, what a Shade eats is souls... and yours is as tastey as any dungeon resident.
+Lying broken and dying on the floor of the well, the player is presented with a choice by the **Shade of Koranth**, who has been trapped in the caves by magics of old. The shade gives the player the choice of dying then and there, or being possessed; of healing to more than past strength and hew or of dying forgotten on this dusty floor. The price of such resurection would of course be small: only that the player provide food for it, and be carried out of this forsaken cave. Of course, what a Shade eats is souls... and yours is as tastey as any dungeon resident.
 
 ##### Mechanics
 Actual gameplay-wise, the goals are:
 * A simple to understand, 20~60 minute roguelike, that provides both tactical and strategic challenge, though focusing more on tactics.
+* Interclass balance is unimportant, though meaningful choices in each class is a paramount.
+* Two main resources to juggle/maintain: Health, and Soul.
+* Hunger mechanic is staved off by defeating enemies with
+your Shade enchanted weapon, or consuming soul crystals.
+* Health does not regen overtime without spending Soul.
+* Shade has various Boons for you, all with low, low, low costs to your soul. There's even payment plans for those low on soul.
 * 10 Levels, with 3 Main sections: The Well, The Temple, The Tunnels.
-* Optional side areas, which replace levels of the main dungeon if their entrance is taken: The Labrynth, The Cage, The Aerotoreum, The Jungle in the Dark, The Wailing Cavern, and The Shifting Desert.
+* Optional side areas, which replace levels of the main dungeon if their entrance is taken: The Labrynth at Coretos, The Cage of the Headless Fool, The Aerotorium, The Jungle in the Dark, The Wailing Cavern, and The Shifting Desert.
 * 26 enemies: 1 for each letter of the alphabet.
 * Randomly generated Unique monsters.
 * 1 Boss guarding each section.
@@ -39,6 +45,7 @@ Actual gameplay-wise, the goals are:
   * A combo focused character, with each special attack leading to a completely new set of abilities.
   * Item based spell system, similar to the Ring of Set from Conan.
 * Less focus on found weapons by providing weapon of the players choice that grows with the players time in the dungeon.
+* Meaningful differences between weapon types.
 * Items focusing on in combat escape being a rarity.
 * Random Artifacts (Stretch)
 * Rune System for armors providing set bonuses per rune.
@@ -46,3 +53,4 @@ Actual gameplay-wise, the goals are:
 ##### Links:
 [Elm Homepage](https://www.elm-lang.org)
 [r/roguelikedev](https://www.reddet.com/r/roguelikedev)
+[My Blog](http://inchaosproductions.blogspot.com/)
