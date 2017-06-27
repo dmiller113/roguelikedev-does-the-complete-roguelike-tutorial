@@ -4,6 +4,9 @@ import Time exposing (Time, millisecond)
 import Keyboard exposing (KeyCode, downs)
 import Char exposing (fromCode)
 import String exposing (fromChar)
+import Models.Actor exposing (Actor, Component(..))
+import Models.Position exposing (Position)
+import Services.Key exposing (KeyboardStatus, tickKeyboard, updateKeyboardStatus)
 -- Look into Keyboard.Extra
 
 
@@ -19,43 +22,32 @@ main =
 
 
 -- Models
-type alias Model = (Int, Int)
+type alias Model =
+  { actor: Actor
+  , keys: KeyboardStatus
+  }
 
-type alias Delta = (Int, Int)
+initialPos: Component
+initialPos = PositionComponent { x = 40, y = 13 }
+
+initialKeys: KeyboardStatus
+initialKeys = []
 
 init: (Model, Cmd Msg)
-init = ( (40, 13), render ((40, 13), "@"))
+init = (
+  { actor = {id = 0, name="Player", components=[initialPos]}
+  , keys = initialKeys
+  }
+  , render ({ x = 40, y = 13 }, "@")
+  )
 
 
 -- Updates
 type Msg = Reset
   | Tick Time
   | KeyDown KeyCode
+  | Turn KeyCode
 
-
--- Left == 37 - Down == 40
-deltaPosition: KeyCode -> (Int, Int)
-deltaPosition code =
-  case code of
-    37 -> -- Left
-      (-1, 0)
-    38 -> -- Up
-      (0, -1)
-    39 -> -- Right
-      (1, 0)
-    40 -> -- Down
-      (0, 1)
-    _ ->
-      (0, 0)
-
-
-updatePosition: Model -> Delta -> Model
-updatePosition model delta =
-  let
-    (nX, nY) = delta
-    (x, y) = model
-  in
-    (x + nX, y + nY)
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -63,12 +55,19 @@ update msg model =
     Reset ->
       init
     Tick newTime ->
-      (model, Cmd.none)
+      ({ model | keys = tickKeyboard model.keys}, Cmd.none)
     KeyDown code ->
       let
-        newPos = updatePosition model <| deltaPosition code
+        keys = updateKeyboardStatus model.keys code
       in
-        ( newPos, render (newPos, "@"))
+        ( { model | keys = keys }, render ({ x = 13, y = 15}, "@"))
+    Turn _ ->
+      let
+        keys = model.keys
+        actor = model.actor
+        newActor = actor
+      in
+        (model, Cmd.none)
 
 
 -- View
@@ -82,8 +81,9 @@ subscriptions model =
   Sub.batch
     [ Time.every (1000 / 24 * millisecond) Tick
     , downs KeyDown
+    , downs Turn
     ]
 
 
 -- Ports
-port render: (Model, String) -> Cmd msg
+port render: (Position, String) -> Cmd msg
