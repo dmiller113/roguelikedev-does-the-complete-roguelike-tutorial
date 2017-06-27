@@ -63,11 +63,11 @@ update msg model =
         ( { model | keys = keys }, render ({ x = 13, y = 15}, "@"))
     Turn _ ->
       let
-        keys = model.keys
         actor = model.actor
         newActor = actor
+        keys = model.keys
       in
-        (model, Cmd.none)
+        ( { model | actor = newActor, keys = keys }, Cmd.none)
 
 
 -- View
