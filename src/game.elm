@@ -4,9 +4,12 @@ import Time exposing (Time, millisecond)
 import Keyboard exposing (KeyCode, downs)
 import Char exposing (fromCode)
 import String exposing (fromChar)
-import Models.Actor exposing (Actor, Component(..))
-import Models.Position exposing (Position)
-import Services.Key exposing (KeyboardStatus, tickKeyboard, updateKeyboardStatus)
+import Models.Actor exposing (Actor)
+import Services.Component exposing (Component(..), updateComponents)
+import Models.Position exposing (updatePosition,
+                                 extractPosition, isPositionComponent)
+import Services.Key exposing (Key(..), handleKeyCode)
+import Models.ComponentStateTypes exposing (Position)
 -- Look into Keyboard.Extra
 
 
@@ -24,19 +27,19 @@ main =
 -- Models
 type alias Model =
   { actor: Actor
-  , keys: KeyboardStatus
+  , key: Key
   }
 
 initialPos: Component
-initialPos = PositionComponent { x = 40, y = 13 }
+initialPos = PositionComponent { x = 40, y = 13 } updatePosition
 
-initialKeys: KeyboardStatus
-initialKeys = []
+initialKey: Key
+initialKey = NoKey
 
 init: (Model, Cmd Msg)
 init = (
   { actor = {id = 0, name="Player", components=[initialPos]}
-  , keys = initialKeys
+  , key = initialKey
   }
   , render ({ x = 40, y = 13 }, "@")
   )
@@ -46,7 +49,6 @@ init = (
 type Msg = Reset
   | Tick Time
   | KeyDown KeyCode
-  | Turn KeyCode
 
 
 update: Msg -> Model -> (Model, Cmd Msg)
@@ -55,19 +57,19 @@ update msg model =
     Reset ->
       init
     Tick newTime ->
-      ({ model | keys = tickKeyboard model.keys}, Cmd.none)
+      let
+        posC = List.head <|
+          List.filter isPositionComponent model.actor.components
+        pos = extractPosition posC
+      in
+        ({ model | key = NoKey }, render (pos, "@"))
     KeyDown code ->
       let
-        keys = updateKeyboardStatus model.keys code
-      in
-        ( { model | keys = keys }, render ({ x = 13, y = 15}, "@"))
-    Turn _ ->
-      let
+        key = handleKeyCode code
         actor = model.actor
-        newActor = actor
-        keys = model.keys
+        newActor = { actor | components = updateComponents key actor.components }
       in
-        ( { model | actor = newActor, keys = keys }, Cmd.none)
+        ( { model | actor = newActor, key = key }, Cmd.none)
 
 
 -- View
@@ -81,7 +83,6 @@ subscriptions model =
   Sub.batch
     [ Time.every (1000 / 24 * millisecond) Tick
     , downs KeyDown
-    , downs Turn
     ]
 
 

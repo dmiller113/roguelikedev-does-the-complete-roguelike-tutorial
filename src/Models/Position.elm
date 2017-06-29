@@ -1,11 +1,10 @@
-module Models.Position exposing (Position, updatePosition)
+module Models.Position exposing (updatePosition,
+                                 extractPosition, isPositionComponent)
+import Services.Component exposing (Component(..))
 import Services.Key exposing (Key(..))
+import Maybe exposing (Maybe(..))
+import Models.ComponentStateTypes exposing (Position)
 
-
-type alias Position =
-  { x: Int
-  , y: Int
-  }
 
 type alias Delta = (Int, Int)
 
@@ -27,10 +26,32 @@ deltaPosition key =
 
 
 -- Updates
-updatePosition: Position -> Delta -> Position
-updatePosition position delta =
+updatePosition: Position -> Key -> Position
+updatePosition position key =
   let
-    (nX, nY) = delta
+    (nX, nY) = deltaPosition key
     {x, y} = position
   in
     { x = x + nX, y = y + nY }
+
+
+-- Utilities
+extractPosition: Maybe Component -> Position
+extractPosition c =
+  case c of
+    Just position ->
+      case position of
+        PositionComponent position _ ->
+          position
+        _ ->
+          { x = 0, y = 0 }
+    Nothing ->
+      { x = 0, y = 0 }
+
+isPositionComponent: Component -> Bool
+isPositionComponent c =
+  case c of
+    PositionComponent _ _ ->
+      True
+    _ ->
+      False

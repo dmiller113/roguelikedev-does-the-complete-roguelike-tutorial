@@ -1,7 +1,6 @@
-module Models.Actor exposing (Actor, Component(..), updateComponents)
-import Models.Position exposing (Position, updatePosition)
+module Models.Actor exposing (Actor)
+import Services.Component exposing (Component(..))
 
-type Component = NoComponent | PositionComponent Position
 
 type alias Actor =
   { id: Int
@@ -11,17 +10,3 @@ type alias Actor =
 
 
 -- Update stuff specific to Actors
-
--- Update stuff specific to Components
-updateComponents: List Component -> List Component
-updateComponents componentList =
-  List.map updateComponent componentList
-
-
-updateComponent: Component -> Component
-updateComponent component =
-  case component of
-    PositionComponent position ->
-      PositionComponent position
-    NoComponent ->
-      component
