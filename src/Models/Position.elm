@@ -39,8 +39,8 @@ updatePosition position key =
 extractPosition: Maybe Component -> Position
 extractPosition c =
   case c of
-    Just position ->
-      case position of
+    Just component ->
+      case component of
         PositionComponent position _ ->
           position
         _ ->
