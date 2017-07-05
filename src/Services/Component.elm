@@ -1,10 +1,11 @@
 module Services.Component exposing (Component(..), updateComponents)
-import Models.ComponentStateTypes exposing (Position)
+import Models.ComponentStateTypes exposing (Position, Symbol)
 import Services.Key exposing (Key(..))
 
 
 type Component = NoComponent
   | PositionComponent Position (Position -> Key -> Position)
+  | DrawComponent Position Symbol
 
 -- Update stuff specific to Components
 updateComponents: Key -> List Component -> List Component
@@ -16,6 +17,6 @@ updateComponent: Key -> Component -> Component
 updateComponent key component =
   case component of
     PositionComponent position updatePosition ->
-      PositionComponent (updatePosition position key)  updatePosition
-    NoComponent ->
+      PositionComponent (updatePosition position key) updatePosition
+    _ ->
       component

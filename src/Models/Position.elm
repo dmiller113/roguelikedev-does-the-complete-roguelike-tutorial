@@ -36,15 +36,11 @@ updatePosition position key =
 
 
 -- Utilities
-extractPosition: Maybe Component -> Position
-extractPosition c =
-  case c of
-    Just component ->
-      case component of
-        PositionComponent position _ ->
-          position
-        _ ->
-          { x = 0, y = 0 }
+extractPosition: Maybe Position -> Position
+extractPosition p =
+  case p of
+    Just position ->
+      position
     Nothing ->
       { x = 0, y = 0 }
 

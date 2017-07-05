@@ -4,12 +4,12 @@ import Time exposing (Time, millisecond)
 import Keyboard exposing (KeyCode, downs)
 import Char exposing (fromCode)
 import String exposing (fromChar)
+import Dict exposing (Dict)
 import Models.Actor exposing (Actor)
-import Services.Component exposing (Component(..), updateComponents)
-import Models.Position exposing (updatePosition,
-                                 extractPosition, isPositionComponent)
+import Services.Component exposing (Component(..))
+import Models.Position exposing (updatePosition, extractPosition)
 import Services.Key exposing (Key(..), handleKeyCode)
-import Models.ComponentStateTypes exposing (Position)
+import Models.ComponentStateTypes exposing (Position, DrawInfo, Symbol)
 -- Look into Keyboard.Extra
 
 
@@ -28,20 +28,40 @@ main =
 type alias Model =
   { actor: Actor
   , key: Key
+  , positions: Dict Int Position
+  , drawables: Dict Int DrawInfo
   }
 
-initialPos: Component
-initialPos = PositionComponent { x = 40, y = 13 } updatePosition
+
+initialPos: Position
+initialPos = { x = 40, y = 13 }
+
+initialSymbol: Symbol
+initialSymbol = '@'
+
+initialDrawInfo: DrawInfo
+initialDrawInfo =
+  { position = initialPos
+  , symbol = initialSymbol
+  }
+
+initialPosDict: Dict Int Position
+initialPosDict = Dict.singleton 0 initialPos
+
+initialDrawDict: Dict Int DrawInfo
+initialDrawDict = Dict.singleton 0 initialDrawInfo
 
 initialKey: Key
 initialKey = NoKey
 
 init: (Model, Cmd Msg)
 init = (
-  { actor = {id = 0, name="Player", components=[initialPos]}
+  { actor = {id = 0, name="Player"}
   , key = initialKey
+  , positions = initialPosDict
+  , drawables = initialDrawDict
   }
-  , render ({ x = 40, y = 13 }, "@")
+  , render (initialPos, String.fromChar initialSymbol)
   )
 
 
@@ -58,18 +78,21 @@ update msg model =
       init
     Tick newTime ->
       let
-        posC = List.head <|
-          List.filter isPositionComponent model.actor.components
-        pos = extractPosition posC
+        di = Maybe.withDefault initialDrawInfo <| Dict.get model.actor.id model.drawables
       in
-        ({ model | key = NoKey }, render (pos, "@"))
+        ({ model | key = NoKey }, render (di.position, String.fromChar di.symbol))
     KeyDown code ->
       let
         key = handleKeyCode code
-        actor = model.actor
-        newActor = { actor | components = updateComponents key actor.components }
+        di = Maybe.withDefault initialDrawInfo <|
+          Dict.get model.actor.id model.drawables
+        symbol = di.symbol
+        pos = (updatePosition <| extractPosition <|
+          Dict.get model.actor.id model.positions) key
+        newPositions = Dict.singleton model.actor.id pos
+        newDrawables = Dict.singleton model.actor.id { position = pos, symbol = symbol }
       in
-        ( { model | actor = newActor, key = key }, Cmd.none)
+        ( { model | key = key, positions = newPositions, drawables = newDrawables }, Cmd.none)
 
 
 -- View
