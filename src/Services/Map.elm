@@ -28,11 +28,11 @@ initPositions ly x =
 initMap: Int -> Int -> Int -> Dict Int Position -> Dict Int DrawInfo -> (List Tile, Dict Int Position, Dict Int DrawInfo, Int)
 initMap nextId maxX maxY pDict dDict=
   let
-    idList = List.range nextId (nextId + maxX * maxY)
+    idList = List.range nextId (nextId + (maxX + 1) * (maxY + 1) - 1)
     xList = List.range 0 maxX
     yList = List.range 0 maxY
     tiles = List.map initTile idList
-    positions = List.concatMap (initPositions yList) xList
+    positions =  List.concatMap (initPositions yList) xList
     positionDict = linkTilesToPosition tiles positions pDict
     drawables = linkTilesToDraw tiles positionDict dDict
   in

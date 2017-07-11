@@ -88,7 +88,7 @@ update msg model =
   case model.state of
     Init ->
       let
-        (map, newPositions, newDrawables, newId) = initMap model.nextAvailableId 80 25 model.positions model.drawables
+        (map, newPositions, newDrawables, newId) = initMap model.nextAvailableId 79 24 model.positions model.drawables
       in
         ({ model | state = GamePlay
           , currentMap = map
@@ -133,10 +133,11 @@ view model =
 
 renderView: Dict Int DrawInfo -> String
 renderView dictDi =
-  Dict.values dictDi |>
-    sortDrawInfo |>
-    List.map (\x -> fromChar x.symbol) |>
-    List.foldl (++) ""
+  Dict.remove 0 dictDi |>
+  Dict.values |>
+  sortDrawInfo |>
+  List.map (\x -> fromChar x.symbol) |>
+  List.foldl (++) ""
 
 
 -- Subscriptions
