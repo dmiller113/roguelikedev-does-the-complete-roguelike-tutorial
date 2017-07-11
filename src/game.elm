@@ -9,7 +9,7 @@ import Models.Entity exposing (Entity)
 import Services.Component exposing (Component(..))
 import Models.Position exposing (updatePosition, extractPosition)
 import Services.Key exposing (Key(..), handleKeyCode)
-import Models.ComponentStateTypes exposing (Position, DrawInfo, Symbol)
+import Models.ComponentStateTypes exposing (Position, DrawInfo, Symbol, sortDrawInfo)
 import Services.Map exposing (Tile, initMap)
 -- Look into Keyboard.Extra
 
@@ -133,7 +133,10 @@ view model =
 
 renderView: Dict Int DrawInfo -> String
 renderView dictDi =
-  "aset"
+  Dict.values dictDi |>
+    sortDrawInfo |>
+    List.map (\x -> fromChar x.symbol) |>
+    List.foldl (++) ""
 
 
 -- Subscriptions

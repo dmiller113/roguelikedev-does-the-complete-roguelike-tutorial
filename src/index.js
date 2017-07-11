@@ -9,7 +9,7 @@ window.onload = (event) => {
 
   app.ports.render.subscribe( (data) => {
     display.clear();
-    display.drawText(0, 0, data);
+    display.drawText(0, 0, data, CONST.DISPLAY_WIDTH);
   });
 
   document.body.append(display.getContainer())
