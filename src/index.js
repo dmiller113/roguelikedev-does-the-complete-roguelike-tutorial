@@ -9,7 +9,7 @@ window.onload = (event) => {
 
   app.ports.render.subscribe( (data) => {
     display.clear();
-    display.draw(data[0].x, data[0].y, data[1], "#77ddFF");
+    display.drawText(0, 0, data);
   });
 
   document.body.append(display.getContainer())

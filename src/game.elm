@@ -5,11 +5,12 @@ import Keyboard exposing (KeyCode, downs)
 import Char exposing (fromCode)
 import String exposing (fromChar)
 import Dict exposing (Dict)
-import Models.Actor exposing (Actor)
+import Models.Entity exposing (Entity)
 import Services.Component exposing (Component(..))
 import Models.Position exposing (updatePosition, extractPosition)
 import Services.Key exposing (Key(..), handleKeyCode)
 import Models.ComponentStateTypes exposing (Position, DrawInfo, Symbol)
+import Services.Map exposing (Tile, initMap)
 -- Look into Keyboard.Extra
 
 
@@ -25,11 +26,19 @@ main =
 
 
 -- Models
+type ProgramState = Init
+  | GamePlay
+  | GameOver
+
+
 type alias Model =
-  { actor: Actor
+  { actor: Entity
   , key: Key
   , positions: Dict Int Position
   , drawables: Dict Int DrawInfo
+  , currentMap: List Tile
+  , nextAvailableId: Int
+  , state: ProgramState
   }
 
 
@@ -60,8 +69,11 @@ init = (
   , key = initialKey
   , positions = initialPosDict
   , drawables = initialDrawDict
+  , currentMap = []
+  , nextAvailableId = 1
+  , state = Init
   }
-  , render (initialPos, String.fromChar initialSymbol)
+  , render <| renderView initialDrawDict
   )
 
 
@@ -73,6 +85,25 @@ type Msg = Reset
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
+  case model.state of
+    Init ->
+      let
+        (map, newPositions, newDrawables, newId) = initMap model.nextAvailableId 80 25 model.positions model.drawables
+      in
+        ({ model | state = GamePlay
+          , currentMap = map
+          , nextAvailableId = newId
+          , positions = newPositions
+          , drawables = newDrawables
+          }, Cmd.none)
+    GamePlay ->
+      gameplayUpdate msg model
+    _ ->
+      (model, Cmd.none)
+
+
+gameplayUpdate: Msg -> Model -> (Model, Cmd Msg)
+gameplayUpdate msg model =
   case msg of
     Reset ->
       init
@@ -80,7 +111,7 @@ update msg model =
       let
         di = Maybe.withDefault initialDrawInfo <| Dict.get model.actor.id model.drawables
       in
-        ({ model | key = NoKey }, render (di.position, String.fromChar di.symbol))
+        ({ model | key = NoKey }, render <| renderView model.drawables)
     KeyDown code ->
       let
         key = handleKeyCode code
@@ -94,11 +125,16 @@ update msg model =
       in
         ( { model | key = key, positions = newPositions, drawables = newDrawables }, Cmd.none)
 
-
 -- View
 view: Model -> Html Msg
 view model =
   div [] []
+
+
+renderView: Dict Int DrawInfo -> String
+renderView dictDi =
+  "aset"
+
 
 -- Subscriptions
 subscriptions: Model -> Sub Msg
@@ -110,4 +146,4 @@ subscriptions model =
 
 
 -- Ports
-port render: (Position, String) -> Cmd msg
+port render: String -> Cmd msg
