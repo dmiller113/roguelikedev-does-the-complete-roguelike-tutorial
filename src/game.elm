@@ -11,7 +11,9 @@ import Models.Position exposing (updatePosition, extractPosition)
 import Services.Key exposing (Key(..), handleKeyCode)
 import Models.ComponentStateTypes exposing (Position, DrawInfo, Symbol, sortDrawInfo)
 import Services.Map exposing (Tile, initMap)
+import Lib.Utils exposing (insertAt)
 -- Look into Keyboard.Extra
+
 
 
 -- Main
@@ -76,6 +78,8 @@ init = (
   , render <| renderView initialDrawDict
   )
 
+mapDimensions: { x: Int, y: Int }
+mapDimensions = {x = 80, y = 25}
 
 -- Updates
 type Msg = Reset
@@ -88,7 +92,7 @@ update msg model =
   case model.state of
     Init ->
       let
-        (map, newPositions, newDrawables, newId) = initMap model.nextAvailableId 79 24 model.positions model.drawables
+        (map, newPositions, newDrawables, newId) = initMap model.nextAvailableId (mapDimensions.x - 1) (mapDimensions.y - 1) model.positions model.drawables
       in
         ({ model | state = GamePlay
           , currentMap = map
@@ -121,7 +125,7 @@ gameplayUpdate msg model =
         pos = (updatePosition <| extractPosition <|
           Dict.get model.actor.id model.positions) key
         newPositions = Dict.singleton model.actor.id pos
-        newDrawables = Dict.singleton model.actor.id { position = pos, symbol = symbol }
+        newDrawables = (Dict.union <| Dict.singleton model.actor.id { position = pos, symbol = symbol }) model.drawables
       in
         ( { model | key = key, positions = newPositions, drawables = newDrawables }, Cmd.none)
 
@@ -133,11 +137,16 @@ view model =
 
 renderView: Dict Int DrawInfo -> String
 renderView dictDi =
-  Dict.remove 0 dictDi |>
-  Dict.values |>
-  sortDrawInfo |>
-  List.map (\x -> fromChar x.symbol) |>
-  List.foldl (++) ""
+  let
+    actorPos = .position <| Maybe.withDefault initialDrawInfo <| Dict.get 0 dictDi
+    posInt = actorPos.x + actorPos.y * mapDimensions.x
+  in
+    Dict.remove 0 dictDi |>
+    Dict.values |>
+    sortDrawInfo |>
+    List.map (\x -> fromChar x.symbol) |>
+    List.foldl (++) "" |>
+    insertAt posInt "@"
 
 
 -- Subscriptions
