@@ -1,4 +1,4 @@
-module Models.ComponentStateTypes exposing (Position, DrawInfo, Symbol, sortDrawInfo)
+module Models.ComponentStateTypes exposing (Position, DrawInfo, Symbol, Momentum, sortDrawInfo)
 
 type alias Position =
   { x: Int
@@ -6,6 +6,11 @@ type alias Position =
   }
 
 type alias Symbol = Char
+
+type alias Momentum =
+  { cX: Int
+  , cY: Int
+  }
 
 type alias DrawInfo =
   { position: Position

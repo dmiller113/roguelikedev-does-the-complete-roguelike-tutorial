@@ -9,7 +9,8 @@ import Models.Entity exposing (Entity)
 import Services.Component exposing (Component(..))
 import Models.Position exposing (updatePosition, extractPosition)
 import Services.Key exposing (Key(..), handleKeyCode)
-import Models.ComponentStateTypes exposing (Position, DrawInfo, Symbol, sortDrawInfo)
+import Models.ComponentStateTypes exposing (Position, DrawInfo, Symbol, Momentum, sortDrawInfo)
+import Services.Movement exposing (updateMovables, moveActors)
 import Services.Map exposing (Tile, initMap)
 import Lib.Utils exposing (insertAt)
 -- Look into Keyboard.Extra
@@ -33,11 +34,16 @@ type ProgramState = Init
   | GameOver
 
 
+type alias Components =
+  { positions: Dict Int Position
+  , drawables: Dict Int DrawInfo
+  , movables: Dict Int Momentum
+  }
+
 type alias Model =
   { actor: Entity
   , key: Key
-  , positions: Dict Int Position
-  , drawables: Dict Int DrawInfo
+  , components: Components
   , currentMap: List Tile
   , nextAvailableId: Int
   , state: ProgramState
@@ -56,21 +62,36 @@ initialDrawInfo =
   , symbol = initialSymbol
   }
 
+initialMomentum: Momentum
+initialMomentum =
+  { cX = 0
+  , cY = 0
+  }
+
 initialPosDict: Dict Int Position
 initialPosDict = Dict.singleton 0 initialPos
 
 initialDrawDict: Dict Int DrawInfo
 initialDrawDict = Dict.singleton 0 initialDrawInfo
 
+initialMovables: Dict Int Momentum
+initialMovables = Dict.singleton 0 initialMomentum
+
 initialKey: Key
 initialKey = NoKey
+
+initialComponents: Components
+initialComponents =
+  { positions = initialPosDict
+  , drawables = initialDrawDict
+  , movables = initialMovables
+  }
 
 init: (Model, Cmd Msg)
 init = (
   { actor = {id = 0, name="Player"}
   , key = initialKey
-  , positions = initialPosDict
-  , drawables = initialDrawDict
+  , components = initialComponents
   , currentMap = []
   , nextAvailableId = 1
   , state = Init
@@ -92,13 +113,16 @@ update msg model =
   case model.state of
     Init ->
       let
-        (map, newPositions, newDrawables, newId) = initMap model.nextAvailableId (mapDimensions.x - 1) (mapDimensions.y - 1) model.positions model.drawables
+        (map, newPositions, newDrawables, newId) = initMap model.nextAvailableId (mapDimensions.x - 1) (mapDimensions.y - 1) model.components.positions model.components.drawables
+        precomponents = model.components
+        components = { precomponents | positions = newPositions
+          , drawables = newDrawables
+          }
       in
         ({ model | state = GamePlay
           , currentMap = map
           , nextAvailableId = newId
-          , positions = newPositions
-          , drawables = newDrawables
+          , components = components
           }, Cmd.none)
     GamePlay ->
       gameplayUpdate msg model
@@ -113,21 +137,22 @@ gameplayUpdate msg model =
       init
     Tick newTime ->
       let
-        di = Maybe.withDefault initialDrawInfo <| Dict.get model.actor.id model.drawables
+        di = Maybe.withDefault initialDrawInfo <| Dict.get model.actor.id model.components.drawables
       in
-        ({ model | key = NoKey }, render <| renderView model.drawables)
+        ({ model | key = NoKey }, render <| renderView model.components.drawables)
     KeyDown code ->
       let
         key = handleKeyCode code
+        movables = updateMovables model.components.movables key model.actor.id
         di = Maybe.withDefault initialDrawInfo <|
-          Dict.get model.actor.id model.drawables
-        symbol = di.symbol
-        pos = (updatePosition <| extractPosition <|
-          Dict.get model.actor.id model.positions) key
-        newPositions = Dict.singleton model.actor.id pos
-        newDrawables = (Dict.union <| Dict.singleton model.actor.id { position = pos, symbol = symbol }) model.drawables
+          Dict.get model.actor.id model.components.drawables
+
+        newPositions = moveActors movables model.components.positions
+        pos = Maybe.withDefault initialPos <| Dict.get model.actor.id newPositions
+        newDrawables = (Dict.union <| Dict.singleton model.actor.id { di | position = pos }) model.components.drawables
+        newComponents = { drawables = newDrawables, positions = newPositions, movables = model.components.movables}
       in
-        ( { model | key = key, positions = newPositions, drawables = newDrawables }, Cmd.none)
+        ( { model | key = key, components = newComponents }, Cmd.none)
 
 -- View
 view: Model -> Html Msg

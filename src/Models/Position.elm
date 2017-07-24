@@ -1,9 +1,10 @@
-module Models.Position exposing (updatePosition,
+module Models.Position exposing (updatePosition, deltaPosition,
                                  extractPosition, isPositionComponent)
 import Services.Component exposing (Component(..))
 import Services.Key exposing (Key(..))
 import Maybe exposing (Maybe(..))
-import Models.ComponentStateTypes exposing (Position)
+import Dict exposing (Dict)
+import Models.ComponentStateTypes exposing (Position, Momentum)
 
 
 type alias Delta = (Int, Int)
@@ -26,13 +27,12 @@ deltaPosition key =
 
 
 -- Updates
-updatePosition: Position -> Key -> Position
-updatePosition position key =
+updatePosition: Dict Int Momentum -> Int -> Position -> Position
+updatePosition momentumDict eid position =
   let
-    (nX, nY) = deltaPosition key
-    {x, y} = position
+    {cX, cY} = Maybe.withDefault { cX = 0, cY = 0 } <| Dict.get eid momentumDict
   in
-    { x = x + nX, y = y + nY }
+    { x = position.x + cX, y = position.y + cY }
 
 
 -- Utilities
