@@ -4,6 +4,7 @@ import Models.ComponentStateTypes exposing (Position, DrawInfo)
 import Models.Position exposing (extractPosition)
 import Models.Tiles exposing (TileInfo, floor_tile)
 import Services.Physical exposing (PhysicalInfo, PhysicalDict)
+import Services.Component exposing (Components)
 import Dict exposing (Dict)
 
 type alias Tile = Entity
@@ -27,7 +28,11 @@ initPositions: List Int -> Int -> List Position
 initPositions ly x =
   List.map (initPosition x) ly
 
-initMap: Int -> Int -> Int -> Dict Int Position -> Dict Int DrawInfo -> (List Tile, Dict Int Position, Dict Int DrawInfo, Int)
+initMap: Int -> Int -> Int -> Dict Int Position -> Dict Int DrawInfo -> ( List Tile
+                                                                        , Dict Int Position
+                                                                        , Dict Int DrawInfo
+                                                                        , PhysicalDict
+                                                                        , Int)
 initMap nextId maxX maxY pDict dDict=
   let
     idList = List.range nextId (nextId + (maxX + 1) * (maxY + 1) - 1)
@@ -36,9 +41,10 @@ initMap nextId maxX maxY pDict dDict=
     tiles = List.map initTile idList
     positions =  List.concatMap (initPositions yList) xList
     positionDict = linkTilesToPosition tiles positions pDict
+    physicals = linkTilesToPhysical tiles
     drawables = linkTilesToDraw tiles positionDict dDict
   in
-    (tiles, positionDict, drawables, nextId + maxX * maxY)
+    (tiles, positionDict, drawables, physicals, nextId + maxX * maxY)
 
 linkTilesToPosition: List Tile -> List Position -> Dict Int Position -> Dict Int Position
 linkTilesToPosition tiles positionsList positionsDict =

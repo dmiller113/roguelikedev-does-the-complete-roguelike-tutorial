@@ -114,10 +114,11 @@ update msg model =
   case model.state of
     Init ->
       let
-        (map, newPositions, newDrawables, newId) = initMap model.nextAvailableId (mapDimensions.x - 1) (mapDimensions.y - 1) model.components.positions model.components.drawables
+        (map, newPositions, newDrawables, physicals, newId) = initMap model.nextAvailableId (mapDimensions.x - 1) (mapDimensions.y - 1) model.components.positions model.components.drawables
         precomponents = model.components
         components = { precomponents | positions = newPositions
           , drawables = newDrawables
+          , physicals = physicals
           }
       in
         ({ model | state = GamePlay
