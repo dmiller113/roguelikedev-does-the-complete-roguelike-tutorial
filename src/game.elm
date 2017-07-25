@@ -6,7 +6,7 @@ import Char exposing (fromCode)
 import String exposing (fromChar)
 import Dict exposing (Dict)
 import Models.Entity exposing (Entity)
-import Services.Component exposing (Component(..))
+import Services.Component exposing (Components)
 import Models.Position exposing (updatePosition, extractPosition)
 import Services.Key exposing (Key(..), handleKeyCode)
 import Models.ComponentStateTypes exposing (Position, DrawInfo, Symbol, Momentum, sortDrawInfo, drawInfoToString)
@@ -34,13 +34,6 @@ type ProgramState = Init
   | GamePlay
   | GameOver
 
-
-type alias Components =
-  { positions: Dict Int Position
-  , drawables: Dict Int DrawInfo
-  , movables: Dict Int Momentum
-  , physicals: PhysicalDict
-  }
 
 type alias Model =
   { actor: Entity

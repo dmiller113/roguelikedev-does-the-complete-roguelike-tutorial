@@ -1,6 +1,5 @@
 module Models.Position exposing (updatePosition, deltaPosition,
-                                 extractPosition, isPositionComponent)
-import Services.Component exposing (Component(..))
+                                 extractPosition)
 import Services.Key exposing (Key(..))
 import Maybe exposing (Maybe(..))
 import Dict exposing (Dict)
@@ -43,11 +42,3 @@ extractPosition p =
       position
     Nothing ->
       { x = 0, y = 0 }
-
-isPositionComponent: Component -> Bool
-isPositionComponent c =
-  case c of
-    PositionComponent _ _ ->
-      True
-    _ ->
-      False

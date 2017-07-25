@@ -2,6 +2,8 @@ module Services.Map exposing (..)
 import Models.Entity exposing (Entity)
 import Models.ComponentStateTypes exposing (Position, DrawInfo)
 import Models.Position exposing (extractPosition)
+import Models.Tiles exposing (TileInfo, floor_tile)
+import Services.Physical exposing (PhysicalInfo, PhysicalDict)
 import Dict exposing (Dict)
 
 type alias Tile = Entity
@@ -50,16 +52,26 @@ linkTilesToPosition tiles positionsList positionsDict =
 linkTilesToDraw: List Tile -> Dict Int Position -> Dict Int DrawInfo -> Dict Int DrawInfo
 linkTilesToDraw tiles positions drawables =
   let
-    dDi = Dict.fromList <| List.map (initialTilesToDI positions) tiles
+    dDi = Dict.fromList <| List.map (initialTilesToDI floor_tile positions) tiles
   in
     Dict.union dDi drawables
 
-initialTilesToDI: Dict Int Position -> Tile -> (Int, DrawInfo)
-initialTilesToDI positions item =
+linkTilesToPhysical: List Tile -> PhysicalDict
+linkTilesToPhysical tiles =
+  Dict.fromList <| List.map (tileInfoToPhysical floor_tile) tiles
+
+initialTilesToDI: TileInfo -> Dict Int Position -> Tile -> (Int, DrawInfo)
+initialTilesToDI ti positions item =
   ( item.id
   , { position = extractPosition <| Dict.get item.id positions
-    , symbol = '.'
-    , foregroundColor = "#FFFFFF"
-    , backgroundColor = "#333333"
+    , symbol = ti.symbol
+    , foregroundColor = ti.foregroundColor
+    , backgroundColor = ti.backgroundColor
     }
+  )
+
+tileInfoToPhysical: TileInfo -> Tile -> (Int, PhysicalInfo)
+tileInfoToPhysical ti tile =
+  ( tile.id
+  , ti.physicalInfo
   )

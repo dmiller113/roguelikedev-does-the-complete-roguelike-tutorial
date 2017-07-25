@@ -1,6 +1,4 @@
 module Models.Entity exposing (Entity)
-import Services.Component exposing (Component(..))
-
 
 type alias Entity =
   { id: Int
