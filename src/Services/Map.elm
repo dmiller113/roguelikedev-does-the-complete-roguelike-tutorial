@@ -50,7 +50,16 @@ linkTilesToPosition tiles positionsList positionsDict =
 linkTilesToDraw: List Tile -> Dict Int Position -> Dict Int DrawInfo -> Dict Int DrawInfo
 linkTilesToDraw tiles positions drawables =
   let
-    tToDI = (\i -> (i.id, { position = extractPosition <| Dict.get i.id positions, symbol = '.' }))
-    dDi = Dict.fromList <| List.map tToDI tiles
+    dDi = Dict.fromList <| List.map (initialTilesToDI positions) tiles
   in
     Dict.union dDi drawables
+
+initialTilesToDI: Dict Int Position -> Tile -> (Int, DrawInfo)
+initialTilesToDI positions item =
+  ( item.id
+  , { position = extractPosition <| Dict.get item.id positions
+    , symbol = '.'
+    , foregroundColor = "#FFFFFF"
+    , backgroundColor = "#333333"
+    }
+  )

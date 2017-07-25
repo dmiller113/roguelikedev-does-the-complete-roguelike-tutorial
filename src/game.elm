@@ -9,9 +9,10 @@ import Models.Entity exposing (Entity)
 import Services.Component exposing (Component(..))
 import Models.Position exposing (updatePosition, extractPosition)
 import Services.Key exposing (Key(..), handleKeyCode)
-import Models.ComponentStateTypes exposing (Position, DrawInfo, Symbol, Momentum, sortDrawInfo)
+import Models.ComponentStateTypes exposing (Position, DrawInfo, Symbol, Momentum, sortDrawInfo, drawInfoToString)
 import Services.Movement exposing (updateMovables, moveActors)
 import Services.Map exposing (Tile, initMap)
+import Services.Physical exposing (PhysicalDict)
 import Lib.Utils exposing (insertAt)
 -- Look into Keyboard.Extra
 
@@ -38,6 +39,7 @@ type alias Components =
   { positions: Dict Int Position
   , drawables: Dict Int DrawInfo
   , movables: Dict Int Momentum
+  , physicals: PhysicalDict
   }
 
 type alias Model =
@@ -60,6 +62,8 @@ initialDrawInfo: DrawInfo
 initialDrawInfo =
   { position = initialPos
   , symbol = initialSymbol
+  , foregroundColor = "#FFFFFF"
+  , backgroundColor = "#232323"
   }
 
 initialMomentum: Momentum
@@ -77,6 +81,9 @@ initialDrawDict = Dict.singleton 0 initialDrawInfo
 initialMovables: Dict Int Momentum
 initialMovables = Dict.singleton 0 initialMomentum
 
+initialPhysicals: PhysicalDict
+initialPhysicals = Dict.singleton 0 { blocksMovement = True, blocksSight = False }
+
 initialKey: Key
 initialKey = NoKey
 
@@ -85,6 +92,7 @@ initialComponents =
   { positions = initialPosDict
   , drawables = initialDrawDict
   , movables = initialMovables
+  , physicals = initialPhysicals
   }
 
 init: (Model, Cmd Msg)
@@ -150,7 +158,11 @@ gameplayUpdate msg model =
         newPositions = moveActors movables model.components.positions
         pos = Maybe.withDefault initialPos <| Dict.get model.actor.id newPositions
         newDrawables = (Dict.union <| Dict.singleton model.actor.id { di | position = pos }) model.components.drawables
-        newComponents = { drawables = newDrawables, positions = newPositions, movables = model.components.movables}
+        newComponents = { drawables = newDrawables
+                        , positions = newPositions
+                        , movables = model.components.movables
+                        , physicals = model.components.physicals
+                        }
       in
         ( { model | key = key, components = newComponents }, Cmd.none)
 
@@ -163,16 +175,17 @@ view model =
 renderView: Dict Int DrawInfo -> String
 renderView dictDi =
   let
-    actorPos = .position <| Maybe.withDefault initialDrawInfo <| Dict.get 0 dictDi
-    posInt = actorPos.x + actorPos.y * mapDimensions.x
+    actorDI = Maybe.withDefault initialDrawInfo <| Dict.get 0 dictDi
+    actorString = drawInfoToString actorDI
+    actorPos = actorDI.position
+    posInt = (actorPos.x + actorPos.y * mapDimensions.x) * 31
   in
     Dict.remove 0 dictDi |>
     Dict.values |>
     sortDrawInfo |>
-    List.map (\x -> fromChar x.symbol) |>
+    List.map drawInfoToString |>
     List.foldl (++) "" |>
-    insertAt posInt "@"
-
+    insertAt 31 posInt actorString
 
 -- Subscriptions
 subscriptions: Model -> Sub Msg
