@@ -1,4 +1,4 @@
-module Models.Position exposing (updatePosition, deltaPosition,
+module Models.Position exposing (deltaPosition,
                                  extractPosition)
 import Services.Key exposing (Key(..))
 import Maybe exposing (Maybe(..))
@@ -23,15 +23,6 @@ deltaPosition key =
       (0, 1)
     _ ->
       (0, 0)
-
-
--- Updates
-updatePosition: Dict Int Momentum -> Int -> Position -> Position
-updatePosition momentumDict eid position =
-  let
-    {cX, cY} = Maybe.withDefault { cX = 0, cY = 0 } <| Dict.get eid momentumDict
-  in
-    { x = position.x + cX, y = position.y + cY }
 
 
 -- Utilities

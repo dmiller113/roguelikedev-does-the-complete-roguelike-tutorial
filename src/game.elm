@@ -7,7 +7,7 @@ import String exposing (fromChar)
 import Dict exposing (Dict)
 import Models.Entity exposing (Entity)
 import Services.Component exposing (Components)
-import Models.Position exposing (updatePosition, extractPosition)
+import Models.Position exposing (extractPosition)
 import Services.Key exposing (Key(..), handleKeyCode)
 import Models.ComponentStateTypes exposing (Position, DrawInfo, Symbol, Momentum, sortDrawInfo, drawInfoToString)
 import Services.Movement exposing (updateMovables, moveActors)
@@ -149,7 +149,7 @@ gameplayUpdate msg model =
         di = Maybe.withDefault initialDrawInfo <|
           Dict.get model.actor.id model.components.drawables
 
-        newPositions = moveActors movables model.components.positions
+        newPositions = moveActors movables model.components.physicals model.components.positions
         pos = Maybe.withDefault initialPos <| Dict.get model.actor.id newPositions
         newDrawables = (Dict.union <| Dict.singleton model.actor.id { di | position = pos }) model.components.drawables
         newComponents = { drawables = newDrawables
