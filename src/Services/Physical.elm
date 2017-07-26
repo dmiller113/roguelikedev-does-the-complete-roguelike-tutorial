@@ -8,3 +8,11 @@ type alias PhysicalInfo =
   }
 
 type alias PhysicalDict = Dict Int PhysicalInfo
+
+isBlocking: Maybe PhysicalInfo -> Bool
+isBlocking pi =
+  case pi of
+    Just info ->
+      info.blocksMovement
+    _ ->
+      False

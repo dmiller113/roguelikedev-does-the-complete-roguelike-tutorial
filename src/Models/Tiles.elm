@@ -17,6 +17,16 @@ floor_tile =
   , physicalInfo = { blocksMovement = False, blocksSight = False }
   , backgroundColor = "#333333"
   , foregroundColor = "#FFFFFF"
-  , name = "Undescript Floor"
+  , name = "Nondescript Floor"
   , description = "A bare patch of floor. Dust and dirt covers its cool surface."
+  }
+
+wall_tile: TileInfo
+wall_tile =
+  { symbol = '#'
+  , physicalInfo = { blocksMovement = True, blocksSight = True }
+  , backgroundColor = "#333333"
+  , foregroundColor = "#FFFFFF"
+  , name = "Nondescript Wall"
+  , description = "A bare wall. It has a dull shine from your light hitting its slick surface."
   }

@@ -22,13 +22,32 @@ updateMovableWithKey key momentum =
 
 moveActors: Dict Int Momentum -> PhysicalDict -> Dict Int Position -> Dict Int Position
 moveActors momentumDict physicalDict positionDict =
-  Dict.map (updatePosition momentumDict positionDict physicalDict) positionDict
+  let
+    mirroredPositions = Dict.foldl reversePositionDict (Dict.empty) positionDict
+  in
+    Dict.map (updatePosition momentumDict physicalDict mirroredPositions positionDict) positionDict
 
 
-updatePosition: Dict Int Momentum -> Dict Int Position -> PhysicalDict -> Int -> Position -> Position
-updatePosition momentumDict positionDict physicalDict eid position =
+updatePosition: Dict Int Momentum -> PhysicalDict -> Dict String (List Int) -> Dict Int Position -> Int -> Position -> Position
+updatePosition momentumDict physicalDict reversePosition positionDict eid position =
   let
     {cX, cY} = Maybe.withDefault { cX = 0, cY = 0 } <| Dict.get eid momentumDict
-    newPosition = { x = position.x + cX, y = position.y + cY }
+    proposedPosition = { x = position.x + cX, y = position.y + cY }
+    key = (toString proposedPosition.x) ++ ":" ++ (toString proposedPosition.y)
+    newPositionIds = Maybe.withDefault [eid] <| Dict.get key reversePosition
+    newPositionPhysicals = List.map (\i -> Dict.get i physicalDict) newPositionIds
+    newPosition = if List.any Services.Physical.isBlocking newPositionPhysicals then
+                    position
+                  else
+                    proposedPosition
+
   in
     newPosition
+
+reversePositionDict: Int -> Position -> Dict String (List Int) -> Dict String (List Int)
+reversePositionDict tid position accumulator =
+  let
+    key = (toString position.x) ++ ":" ++ (toString position.y)
+    value = (Dict.get key accumulator |> (Maybe.withDefault [])) ++ [tid]
+  in
+    Dict.insert key value accumulator
