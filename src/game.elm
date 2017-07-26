@@ -176,9 +176,10 @@ renderView dictDi =
   in
     Dict.remove 0 dictDi |>
     Dict.values |>
-    sortDrawInfo |> sortDrawInfo |> Debug.log "DI" |>
+    List.sortBy (.position >> .y) |>
+    sortDrawInfo |>
     List.map drawInfoToString |>
-    List.foldl (++) "" |>
+    List.foldr (++) "" |>
     insertAt 31 posInt actorString
 
 -- Subscriptions

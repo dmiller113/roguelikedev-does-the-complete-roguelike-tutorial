@@ -33,10 +33,10 @@ type alias Color = String
 compareDrawInfo: DrawInfo -> DrawInfo -> Order
 compareDrawInfo a b =
   case compare a.position.y b.position.y of
-    GT ->
-      GT
-    _ ->
+    EQ ->
       compare a.position.x b.position.x
+    o ->
+      o
 
 
 sortDrawInfo: List DrawInfo -> List DrawInfo
