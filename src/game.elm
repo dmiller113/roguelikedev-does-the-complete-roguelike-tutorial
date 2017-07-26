@@ -46,7 +46,7 @@ type alias Model =
 
 
 initialPos: Position
-initialPos = { x = 41, y = 13 }
+initialPos = { x = 42, y = 13 }
 
 initialSymbol: Symbol
 initialSymbol = '@'
