@@ -36,10 +36,10 @@ updatePosition momentumDict physicalDict reversePosition positionDict eid positi
       position
     else
       let
-        proposedPosition = { x = position.x + cX, y = position.y + cY } |> Debug.log "Moving To"
+        proposedPosition = { x = position.x + cX, y = position.y + cY }
         key = (toString proposedPosition.x) ++ ":" ++ (toString proposedPosition.y)
-        newPositionIds = Debug.log "NewPosId" <| Maybe.withDefault [eid] <| Dict.get key reversePosition
-        newPositionPhysicals = List.map (\i -> Dict.get i physicalDict) newPositionIds |> Debug.log "Physicals"
+        newPositionIds = Maybe.withDefault [eid] <| Dict.get key reversePosition
+        newPositionPhysicals = List.map (\i -> Dict.get i physicalDict) newPositionIds
       in
         if List.any Services.Physical.isBlocking newPositionPhysicals then
           position

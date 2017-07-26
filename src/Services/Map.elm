@@ -43,8 +43,8 @@ initMap nextId maxX maxY pDict dDict =
     tiles = List.map initTile idList
     mapInfo = List.map mapPointToTileInfo <| String.toList defaultMap
     positions = List.concatMap (initPositions xList) yList
-    positionDict = linkTilesToPosition tiles positions pDict |> Debug.log "PosDict"
-    physicals = linkTilesToPhysical mapInfo tiles |> Debug.log "PhysDict"
+    positionDict = linkTilesToPosition tiles positions pDict
+    physicals = linkTilesToPhysical mapInfo tiles
     drawables = linkTilesToDraw tiles positionDict dDict mapInfo
   in
     (tiles, positionDict, drawables, physicals, nextId + maxX * maxY)
