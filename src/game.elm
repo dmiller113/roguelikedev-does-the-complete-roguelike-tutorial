@@ -46,7 +46,7 @@ type alias Model =
 
 
 initialPos: Position
-initialPos = { x = 40, y = 13 }
+initialPos = { x = 41, y = 13 }
 
 initialSymbol: Symbol
 initialSymbol = '@'
@@ -176,7 +176,7 @@ renderView dictDi =
   in
     Dict.remove 0 dictDi |>
     Dict.values |>
-    sortDrawInfo |>
+    sortDrawInfo |> sortDrawInfo |> Debug.log "DI" |>
     List.map drawInfoToString |>
     List.foldl (++) "" |>
     insertAt 31 posInt actorString

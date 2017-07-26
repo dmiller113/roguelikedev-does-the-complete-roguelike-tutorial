@@ -26,7 +26,17 @@ wall_tile =
   { symbol = '#'
   , physicalInfo = { blocksMovement = True, blocksSight = True }
   , backgroundColor = "#333333"
-  , foregroundColor = "#FFFFFF"
+  , foregroundColor = "#aFdFdF"
   , name = "Nondescript Wall"
   , description = "A bare wall. It has a dull shine from your light hitting its slick surface."
   }
+
+mapPointToTileInfo: Char -> TileInfo
+mapPointToTileInfo point =
+  case point of
+    '#' ->
+      wall_tile
+    '.' ->
+      floor_tile
+    _ ->
+      wall_tile

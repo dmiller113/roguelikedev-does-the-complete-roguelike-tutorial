@@ -40,7 +40,8 @@ compareDrawInfo a b =
 
 
 sortDrawInfo: List DrawInfo -> List DrawInfo
-sortDrawInfo = List.sortWith compareDrawInfo
+sortDrawInfo =
+  List.sortWith compareDrawInfo
 
 drawInfoToString: DrawInfo -> String
 drawInfoToString di =

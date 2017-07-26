@@ -2,10 +2,12 @@ module Services.Map exposing (..)
 import Models.Entity exposing (Entity)
 import Models.ComponentStateTypes exposing (Position, DrawInfo)
 import Models.Position exposing (extractPosition)
-import Models.Tiles exposing (TileInfo, floor_tile)
+import Models.Tiles exposing (TileInfo, mapPointToTileInfo)
 import Services.Physical exposing (PhysicalInfo, PhysicalDict)
 import Services.Component exposing (Components)
+import Constants.Map exposing (defaultMap)
 import Dict exposing (Dict)
+
 
 type alias Tile = Entity
 
@@ -21,28 +23,29 @@ initTile id =
   }
 
 initPosition: Int -> Int -> Position
-initPosition x y =
+initPosition y x =
   {x = x, y = y}
 
 initPositions: List Int -> Int -> List Position
-initPositions ly x =
-  List.map (initPosition x) ly
+initPositions lx y =
+  List.map (initPosition y) lx
 
 initMap: Int -> Int -> Int -> Dict Int Position -> Dict Int DrawInfo -> ( List Tile
                                                                         , Dict Int Position
                                                                         , Dict Int DrawInfo
                                                                         , PhysicalDict
                                                                         , Int)
-initMap nextId maxX maxY pDict dDict=
+initMap nextId maxX maxY pDict dDict =
   let
     idList = List.range nextId (nextId + (maxX + 1) * (maxY + 1) - 1)
     xList = List.range 0 maxX
     yList = List.range 0 maxY
     tiles = List.map initTile idList
-    positions =  List.concatMap (initPositions yList) xList
+    mapInfo = List.map mapPointToTileInfo <| String.toList defaultMap
+    positions = List.concatMap (initPositions xList) yList
     positionDict = linkTilesToPosition tiles positions pDict
-    physicals = linkTilesToPhysical tiles
-    drawables = linkTilesToDraw tiles positionDict dDict
+    physicals = linkTilesToPhysical mapInfo tiles
+    drawables = linkTilesToDraw tiles positionDict dDict mapInfo
   in
     (tiles, positionDict, drawables, physicals, nextId + maxX * maxY)
 
@@ -55,19 +58,19 @@ linkTilesToPosition tiles positionsList positionsDict =
   in
     Dict.fromList <| kvList ++ posList
 
-linkTilesToDraw: List Tile -> Dict Int Position -> Dict Int DrawInfo -> Dict Int DrawInfo
-linkTilesToDraw tiles positions drawables =
+linkTilesToDraw: List Tile -> Dict Int Position -> Dict Int DrawInfo -> List TileInfo -> Dict Int DrawInfo
+linkTilesToDraw tiles positions drawables tiList =
   let
-    dDi = Dict.fromList <| List.map (initialTilesToDI floor_tile positions) tiles
+    dDi = Dict.fromList <| List.map2 (initialTilesToDI positions) tiList tiles
   in
     Dict.union dDi drawables
 
-linkTilesToPhysical: List Tile -> PhysicalDict
-linkTilesToPhysical tiles =
-  Dict.fromList <| List.map (tileInfoToPhysical floor_tile) tiles
+linkTilesToPhysical: List TileInfo -> List Tile -> PhysicalDict
+linkTilesToPhysical tiList tiles =
+  Dict.fromList <| List.map2 tileInfoToPhysical tiList tiles
 
-initialTilesToDI: TileInfo -> Dict Int Position -> Tile -> (Int, DrawInfo)
-initialTilesToDI ti positions item =
+initialTilesToDI: Dict Int Position -> TileInfo -> Tile -> (Int, DrawInfo)
+initialTilesToDI positions ti item =
   ( item.id
   , { position = extractPosition <| Dict.get item.id positions
     , symbol = ti.symbol
