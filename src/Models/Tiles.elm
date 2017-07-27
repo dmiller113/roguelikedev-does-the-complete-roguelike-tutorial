@@ -26,7 +26,7 @@ wall_tile =
   { symbol = '#'
   , physicalInfo = { blocksMovement = True, blocksSight = True }
   , backgroundColor = "#333333"
-  , foregroundColor = "#aFdFdF"
+  , foregroundColor = "#d9eaea"
   , name = "Nondescript Wall"
   , description = "A bare wall. It has a dull shine from your light hitting its slick surface."
   }
