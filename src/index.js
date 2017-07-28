@@ -5,9 +5,9 @@ console.log(CONST)
 
 window.onload = (event) => {
   let display = new ROT.Display({
-    width: CONST.DISPLAY_WIDTH, height: CONST.DISPLAY_HEIGHT, fontSize: 18
+    width: CONST.DISPLAY_WIDTH, height: CONST.DISPLAY_HEIGHT, fontSize: parseInt(CONST.FONT_SIZE)
   });
-  display.getContainer().getContext("2d").font = "18px Overpass Mono";
+  display.getContainer().getContext("2d").font = CONST.FONT_SIZE + " " + CONST.FONT_FAMILY;
   let app = Elm.CharonGame.fullscreen()
 
   app.ports.render.subscribe( (data) => {
