@@ -1,5 +1,7 @@
 module Services.DungeonGeneration exposing (..)
 import Constants.Map exposing (defaultMap, blankMap)
+import Array exposing (Array)
+
 
 type DungeonGenerator = ConstantGenerator
   | RogueGenerator Int Int
@@ -20,52 +22,50 @@ generatorToCharList generator =
     ConstantGenerator ->
       String.toList defaultMap
     RogueGenerator width height ->
-      generateRooms width height 8
+      generateRooms width height 12
 
 
 generateRooms: Int -> Int -> Int -> List Char
 generateRooms width height sections =
-  List.range 0 (sections - 1)
-  |> List.map (generateRoom >> (roomToStrings width height sections))
-  |> List.foldl (stitch ((width // (sections // 2)) )) []
+  let
+    roomInfos = List.range 0 (sections - 1)
+      |> List.map generateRoom
+  in
+    createMap width height roomInfos
+
 
 generateRoom: Int -> RoomInfo
 generateRoom section =
-  { tX = 1, tY = 1, width = 10, height = 9, section = section}
+  { tX = 1, tY = 1, width = 15, height = 6, section = section}
 
 
-roomToStrings: Int -> Int -> Int -> RoomInfo -> List Char
-roomToStrings mwidth mheight sections ri =
-  List.range 0 (mwidth * mheight // sections - 1)
-  |> List.map (constructRoomChars (mwidth // (sections // 2)) ri)
-
-
-constructRoomChars: Int -> RoomInfo -> Int -> Char
-constructRoomChars sectionWidth ri position =
+createMap: Int -> Int -> List RoomInfo -> List Char
+createMap width height roomInfos =
   let
-    roomLeftEdge = ri.tX
-    roomRightEdge = roomLeftEdge + ri.width
-    yPos = position // sectionWidth
+    initMap = Array.repeat (width * height) '#'
+    sections = List.length roomInfos
+    map = List.foldl (changeMapWithRi sections) initMap roomInfos
   in
-    case (compare (position % sectionWidth) roomLeftEdge, compare (position % sectionWidth) roomRightEdge) of
-      (LT, _) -> '#'
-      (_, GT) -> '#'
-      _ ->
-        case (compare yPos ri.tY, compare yPos (ri.tY + ri.height)) of
-          (LT, _) -> '#'
-          (_, GT) -> '#'
-          _ -> '.'
+    Array.toList map
+
+changeMapWithRi: Int -> RoomInfo -> Array Char -> Array Char
+changeMapWithRi sectionCount ri acc =
+  let
+    h = List.range 0 (ri.height - 1)
+    sectionX = (ri.section % 4)
+    sectionY = (ri.section % 3)
+    sectionWidth = 80 // 4
+    sectionHeight = 24 // 3
+    indexes = List.concatMap (formCoords sectionWidth sectionHeight sectionX sectionY ri) h
+  in
+    List.foldl (\i accum -> Array.set i '.' accum) acc indexes
 
 
-stitch: Int -> List a -> List a -> List a
-stitch start_width list1 list2 =
-  case (list1, list2) of
-    (a, []) -> a
-    ([], _) -> []
-    (x::xs, y) ->
-      let
-        width = (List.length y) // (List.length list1)
-        head = List.take width y
-        tail = List.drop width y
-      in
-        head ++ [x] ++ (stitch start_width xs tail)
+formCoords: Int -> Int -> Int -> Int -> RoomInfo -> Int -> List Int
+formCoords sectionWidth sectionHeight sectionX sectionY ri hi =
+  List.range ((ri.tX +
+                (sectionX * sectionWidth)) +
+                ((hi + (ri.tY + (sectionY * sectionHeight))) * 80))
+             ((ri.tX + ri.width +
+                (sectionX * sectionWidth)) +
+                ((hi + ri.tY + (sectionY * sectionHeight)) * 80))
