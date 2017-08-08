@@ -57,11 +57,11 @@ sortDrawInfo =
 drawInfoToString: Set Coord -> Set Coord -> DrawInfo -> String
 drawInfoToString fov explored di =
   case Set.member (di.position.x, di.position.y) fov of
-    True ->
+    _ ->
       "%c{" ++ di.foregroundColor ++ "}" ++ "%b{" ++ di.backgroundColor ++ "}" ++ String.fromChar di.symbol ++ "%c{}%b{}"
-    False ->
-      case Set.member (di.position.x, di.position.y) explored of
-        True ->
-          "%c{" ++ Constants.Colors.explored ++ "}%b{" ++ Constants.Colors.unexplored ++ "}" ++ String.fromChar di.symbol ++ "%c{}%b{}"
-        False ->
-          "%c{" ++ unexplored ++ "}%b{" ++ unexplored ++ "}.%c{}%b{}"
+    -- False ->
+    --   case Set.member (di.position.x, di.position.y) explored of
+    --     True ->
+    --       "%c{" ++ Constants.Colors.explored ++ "}%b{" ++ Constants.Colors.unexplored ++ "}" ++ String.fromChar di.symbol ++ "%c{}%b{}"
+    --     False ->
+    --       "%c{" ++ unexplored ++ "}%b{" ++ unexplored ++ "}.%c{}%b{}"
