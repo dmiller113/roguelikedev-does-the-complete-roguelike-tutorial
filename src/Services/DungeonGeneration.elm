@@ -36,7 +36,7 @@ generateRooms width height sections =
 
 generateRoom: Int -> RoomInfo
 generateRoom section =
-  { tX = 1, tY = 1, width = 15, height = 6, section = section}
+  { tX = 1, tY = 1, width = 16, height = 6, section = section}
 
 
 createMap: Int -> Int -> List RoomInfo -> List Char
