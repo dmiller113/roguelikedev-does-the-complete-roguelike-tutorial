@@ -5,6 +5,7 @@ import Models.Position exposing (extractPosition)
 import Models.Tiles exposing (TileInfo, mapPointToTileInfo)
 import Services.Physical exposing (PhysicalInfo, PhysicalDict)
 import Services.Component exposing (Components)
+import Services.DungeonGeneration exposing (DungeonGenerator, generatorToCharList)
 import Constants.Map exposing (defaultMap)
 import Dict exposing (Dict)
 
@@ -30,18 +31,19 @@ initPositions: List Int -> Int -> List Position
 initPositions lx y =
   List.map (initPosition y) lx
 
-initMap: Int -> Int -> Int -> Dict Int Position -> Dict Int DrawInfo -> ( List Tile
-                                                                        , Dict Int Position
-                                                                        , Dict Int DrawInfo
-                                                                        , PhysicalDict
-                                                                        , Int)
-initMap nextId maxX maxY pDict dDict =
+initMap: Int -> Int -> Int -> Dict Int Position ->
+         Dict Int DrawInfo -> DungeonGenerator -> ( List Tile
+                                                  , Dict Int Position
+                                                  , Dict Int DrawInfo
+                                                  , PhysicalDict
+                                                  , Int)
+initMap nextId maxX maxY pDict dDict dungeonGenerator =
   let
     idList = List.range nextId (nextId + (maxX + 1) * (maxY + 1) - 1)
     xList = List.range 0 maxX
     yList = List.range 0 maxY
     tiles = List.map initTile idList
-    mapInfo = List.map mapPointToTileInfo <| String.toList defaultMap
+    mapInfo = List.map mapPointToTileInfo <| generatorToCharList dungeonGenerator
     positions = List.concatMap (initPositions xList) yList
     positionDict = linkTilesToPosition tiles positions pDict
     physicals = linkTilesToPhysical mapInfo tiles

@@ -5,15 +5,19 @@ import Keyboard exposing (KeyCode, downs)
 import Char exposing (fromCode)
 import String exposing (fromChar)
 import Dict exposing (Dict)
+import Set exposing (Set)
 import Models.Entity exposing (Entity)
 import Services.Component exposing (Components)
 import Models.Position exposing (extractPosition)
 import Services.Key exposing (Key(..), handleKeyCode)
-import Models.ComponentStateTypes exposing (Position, DrawInfo, Symbol, Momentum, sortDrawInfo, drawInfoToString)
+import Models.ComponentStateTypes exposing (Position, DrawInfo, Symbol, Momentum, sortDrawInfo, drawInfoToString, Coord)
 import Services.Movement exposing (updateMovables, moveActors)
 import Services.Map exposing (Tile, initMap)
-import Services.Physical exposing (PhysicalDict)
+import Services.Physical exposing (PhysicalDict, PhysicalInfo)
+import Services.FoV exposing (produceFoVMap)
+import Services.DungeonGeneration exposing (DungeonGenerator(..))
 import Lib.Utils exposing (insertAt)
+
 -- Look into Keyboard.Extra
 
 
@@ -42,6 +46,8 @@ type alias Model =
   , currentMap: List Tile
   , nextAvailableId: Int
   , state: ProgramState
+  , fov: Set Coord
+  , explored: Set Coord
   }
 
 
@@ -96,8 +102,10 @@ init = (
   , currentMap = []
   , nextAvailableId = 1
   , state = Init
+  , fov = Set.empty
+  , explored = Set.empty
   }
-  , render <| renderView initialDrawDict
+  , render <| renderView (Set.empty) (Set.empty) initialDrawDict
   )
 
 mapDimensions: { x: Int, y: Int }
@@ -107,6 +115,7 @@ mapDimensions = {x = 80, y = 25}
 type Msg = Reset
   | Tick Time
   | KeyDown KeyCode
+  | FoVSub Coord
 
 
 update: Msg -> Model -> (Model, Cmd Msg)
@@ -114,7 +123,9 @@ update msg model =
   case model.state of
     Init ->
       let
-        (map, newPositions, newDrawables, physicals, newId) = initMap model.nextAvailableId (mapDimensions.x - 1) (mapDimensions.y - 1) model.components.positions model.components.drawables
+        (map, newPositions, newDrawables, physicals, newId) =
+          initMap model.nextAvailableId (mapDimensions.x - 1) (mapDimensions.y - 1)
+            model.components.positions model.components.drawables <| RogueGenerator 80 24
         precomponents = model.components
         components = { precomponents | positions = newPositions
           , drawables = newDrawables
@@ -125,7 +136,7 @@ update msg model =
           , currentMap = map
           , nextAvailableId = newId
           , components = components
-          }, Cmd.none)
+          }, Cmd.batch [(createFov <| produceFoVMap physicals newPositions), computeFov {x = initialPos.x, y = initialPos.y, r = 10}] )
     GamePlay ->
       gameplayUpdate msg model
     _ ->
@@ -141,7 +152,9 @@ gameplayUpdate msg model =
       let
         di = Maybe.withDefault initialDrawInfo <| Dict.get model.actor.id model.components.drawables
       in
-        ({ model | key = NoKey }, render <| renderView model.components.drawables)
+        ({ model | key = NoKey }, render <| renderView model.fov model.explored model.components.drawables)
+    FoVSub fovInfo ->
+      ({model | fov = Set.insert fovInfo model.fov, explored = Set.insert fovInfo model.explored}, Cmd.none)
     KeyDown code ->
       let
         key = handleKeyCode code
@@ -158,7 +171,7 @@ gameplayUpdate msg model =
                         , physicals = model.components.physicals
                         }
       in
-        ( { model | key = key, components = newComponents }, Cmd.none)
+        ( { model | key = key, components = newComponents, fov = Set.empty },  computeFov {x = pos.x, y = pos.y, r = 10} )
 
 -- View
 view: Model -> Html Msg
@@ -166,11 +179,11 @@ view model =
   div [] []
 
 
-renderView: Dict Int DrawInfo -> String
-renderView dictDi =
+renderView: Set Coord -> Set Coord -> Dict Int DrawInfo -> String
+renderView fov explored dictDi =
   let
     actorDI = Maybe.withDefault initialDrawInfo <| Dict.get 0 dictDi
-    actorString = drawInfoToString actorDI
+    actorString = drawInfoToString fov explored actorDI
     actorPos = actorDI.position
     posInt = (actorPos.x + actorPos.y * mapDimensions.x) * 31
   in
@@ -178,7 +191,7 @@ renderView dictDi =
     Dict.values |>
     List.sortBy (.position >> .y) |>
     sortDrawInfo |>
-    List.map drawInfoToString |>
+    List.map (drawInfoToString fov explored) |>
     List.foldr (++) "" |>
     insertAt 31 posInt actorString
 
@@ -188,8 +201,12 @@ subscriptions model =
   Sub.batch
     [ Time.every (1000 / 24 * millisecond) Tick
     , downs KeyDown
+    , getFov FoVSub
     ]
 
 
 -- Ports
 port render: String -> Cmd msg
+port createFov: String -> Cmd msg
+port computeFov: {x: Int, y: Int, r: Int} -> Cmd msg
+port getFov: (Coord -> msg) -> Sub msg

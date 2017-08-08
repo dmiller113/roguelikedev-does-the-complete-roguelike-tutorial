@@ -6,12 +6,20 @@ module Models.ComponentStateTypes exposing
   , sortDrawInfo
   , Color
   , drawInfoToString
+  , posToString
+  , Coord
   )
+import Set exposing (Set)
+import Constants.Colors exposing(explored, unexplored)
 
 type alias Position =
   { x: Int
   , y: Int
   }
+
+
+type alias Coord =
+  (Int, Int)
 
 type alias Symbol = Char
 
@@ -29,6 +37,9 @@ type alias DrawInfo =
 
 type alias Color = String
 
+posToString: Position -> String
+posToString position =
+  String.concat [toString position.x, ":", toString position.y]
 
 compareDrawInfo: DrawInfo -> DrawInfo -> Order
 compareDrawInfo a b =
@@ -43,6 +54,14 @@ sortDrawInfo: List DrawInfo -> List DrawInfo
 sortDrawInfo =
   List.sortWith compareDrawInfo
 
-drawInfoToString: DrawInfo -> String
-drawInfoToString di =
-  "%c{" ++ di.foregroundColor ++ "}" ++ "%b{" ++ di.backgroundColor ++ "}" ++ String.fromChar di.symbol ++ "%c{}%b{}"
+drawInfoToString: Set Coord -> Set Coord -> DrawInfo -> String
+drawInfoToString fov explored di =
+  case Set.member (di.position.x, di.position.y) fov of
+    True ->
+      "%c{" ++ di.foregroundColor ++ "}" ++ "%b{" ++ di.backgroundColor ++ "}" ++ String.fromChar di.symbol ++ "%c{}%b{}"
+    False ->
+      case Set.member (di.position.x, di.position.y) explored of
+        True ->
+          "%c{" ++ Constants.Colors.explored ++ "}%b{" ++ Constants.Colors.unexplored ++ "}" ++ String.fromChar di.symbol ++ "%c{}%b{}"
+        False ->
+          "%c{" ++ unexplored ++ "}%b{" ++ unexplored ++ "}.%c{}%b{}"
