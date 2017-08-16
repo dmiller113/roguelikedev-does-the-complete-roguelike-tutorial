@@ -4,6 +4,8 @@ let CONST = require('./constants')
 console.log(CONST)
 
 window.onload = (event) => {
+  let lastBuffer = "";
+
   let display = new ROT.Display({
     width: CONST.DISPLAY_WIDTH, height: CONST.DISPLAY_HEIGHT, fontSize: parseInt(CONST.FONT_SIZE)
   });
@@ -11,6 +13,8 @@ window.onload = (event) => {
   let app = Elm.CharonGame.fullscreen()
 
   app.ports.render.subscribe( (data) => {
+    if (lastBuffer == data) return;
+    lastBuffer = data;
     display.clear();
     display.drawText(0, 0, data, CONST.DISPLAY_WIDTH);
   });

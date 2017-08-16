@@ -6,6 +6,7 @@ import Char exposing (fromCode)
 import String exposing (fromChar)
 import Dict exposing (Dict)
 import Set exposing (Set)
+import Random
 import Models.Entity exposing (Entity)
 import Services.Component exposing (Components)
 import Models.Position exposing (extractPosition)
@@ -48,6 +49,8 @@ type alias Model =
   , state: ProgramState
   , fov: Set Coord
   , explored: Set Coord
+  , initialSeedValue: Int
+  , currentSeed: Random.Seed
   }
 
 
@@ -104,6 +107,8 @@ init = (
   , state = Init
   , fov = Set.empty
   , explored = Set.empty
+  , initialSeedValue = 0
+  , currentSeed = Random.initialSeed 0
   }
   , render <| renderView (Set.empty) (Set.empty) initialDrawDict
   )
@@ -123,9 +128,9 @@ update msg model =
   case model.state of
     Init ->
       let
-        (map, newPositions, newDrawables, physicals, newId) =
+        (map, newPositions, newDrawables, physicals, newId, seed) =
           initMap model.nextAvailableId (mapDimensions.x - 1) (mapDimensions.y - 1)
-            model.components.positions model.components.drawables <| RogueGenerator 80 24
+            model.components.positions model.components.drawables <| RogueGenerator 80 24 model.currentSeed
         precomponents = model.components
         components = { precomponents | positions = newPositions
           , drawables = newDrawables
@@ -136,6 +141,7 @@ update msg model =
           , currentMap = map
           , nextAvailableId = newId
           , components = components
+          , currentSeed = seed
           }, Cmd.batch [(createFov <| produceFoVMap physicals newPositions), computeFov {x = initialPos.x, y = initialPos.y, r = 10}] )
     GamePlay ->
       gameplayUpdate msg model

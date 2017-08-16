@@ -8,6 +8,7 @@ import Services.Component exposing (Components)
 import Services.DungeonGeneration exposing (DungeonGenerator, generatorToCharList)
 import Constants.Map exposing (defaultMap)
 import Dict exposing (Dict)
+import Random exposing (Seed)
 
 
 type alias Tile = Entity
@@ -36,20 +37,22 @@ initMap: Int -> Int -> Int -> Dict Int Position ->
                                                   , Dict Int Position
                                                   , Dict Int DrawInfo
                                                   , PhysicalDict
-                                                  , Int)
+                                                  , Int
+                                                  , Seed)
 initMap nextId maxX maxY pDict dDict dungeonGenerator =
   let
     idList = List.range nextId (nextId + (maxX + 1) * (maxY + 1) - 1)
     xList = List.range 0 maxX
     yList = List.range 0 maxY
     tiles = List.map initTile idList
-    mapInfo = List.map mapPointToTileInfo <| generatorToCharList dungeonGenerator
+    (mapChars, seed) = generatorToCharList dungeonGenerator
+    mapInfo = List.map mapPointToTileInfo mapChars
     positions = List.concatMap (initPositions xList) yList
     positionDict = linkTilesToPosition tiles positions pDict
     physicals = linkTilesToPhysical mapInfo tiles
     drawables = linkTilesToDraw tiles positionDict dDict mapInfo
   in
-    (tiles, positionDict, drawables, physicals, nextId + maxX * maxY)
+    (tiles, positionDict, drawables, physicals, nextId + maxX * maxY, seed)
 
 linkTilesToPosition: List Tile -> List Position -> Dict Int Position -> Dict Int Position
 linkTilesToPosition tiles positionsList positionsDict =
