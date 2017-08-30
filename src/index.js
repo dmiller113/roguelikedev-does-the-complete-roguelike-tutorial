@@ -10,7 +10,7 @@ window.onload = (event) => {
     width: CONST.DISPLAY_WIDTH, height: CONST.DISPLAY_HEIGHT, fontSize: parseInt(CONST.FONT_SIZE)
   });
   display.getContainer().getContext("2d").font = CONST.FONT_SIZE + " " + CONST.FONT_FAMILY;
-  let app = Elm.CharonGame.fullscreen()
+  let app = Elm.CharonGame.fullscreen({initialSeed: Date.now()})
 
   app.ports.render.subscribe( (data) => {
     if (lastBuffer == data) return;

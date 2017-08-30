@@ -1,0 +1,11 @@
+{
+    "commands": [
+      {
+        "watch": "src/**/*.elm",
+        "command": "elm make src/game.elm --output dist/game.js"
+      }, {
+        "watch": "src/**/*.js",
+        "command": "./node_modules/.bin/webpack src/index.js dist/index.js"
+      }
+    ]
+}
