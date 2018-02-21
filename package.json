@@ -9,6 +9,8 @@
   },
   "devDependencies": {},
   "scripts": {
+    "make": "elm make src/game.elm --output dist/game.js && ./node_modules/.bin/webpack src/index.js dist/index.js",
+    "start": "elm reactor --address=0.0.0.0",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
